@@ -5,56 +5,112 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="Walletcam — Trésorerie et gestion de caisse offline-first pour commerçants camerounais. Ardoises, relances, solde de caisse.">
+  <meta name="description" content="Walletcam — Trésorerie et gestion de caisse offline-first pour commerçants camerounais.">
   <meta name="theme-color" content="#0B1426">
+  <meta name="color-scheme" content="dark">
 
-  <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Walletcam">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="icon" type="image/png" href="favicon.png">
 
   <title>Walletcam — Trésorerie</title>
   <link rel="manifest" href="manifest.json">
 
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       background-color: #0B1426;
-      color: white;
-      font-family: system-ui, -apple-system, sans-serif;
+      overflow: hidden;
     }
-    .loading {
+    .splash {
+      position: fixed;
+      inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
-      gap: 16px;
+      background: linear-gradient(145deg, #0B1426 0%, #0F1C3F 50%, #0A1628 100%);
+      color: #e0fbf6;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      z-index: 9999;
+      transition: opacity 0.35s ease;
     }
-    .loading h1 {
-      font-size: 1.5rem;
+    .splash.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .logo {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 20px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0, 201, 167, 0.25);
+    }
+    .title {
+      font-size: 1.4rem;
       font-weight: 700;
-      letter-spacing: 2px;
-      margin: 0;
+      letter-spacing: 0.12em;
+      margin: 0 0 6px;
       color: #00C9A7;
+    }
+    .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.65;
+      margin: 0 0 28px;
+    }
+    .spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(0, 201, 167, 0.2);
+      border-top-color: #00C9A7;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    flt-glass-pane, flutter-view {
+      background-color: #0B1426 !important;
     }
   </style>
 </head>
 <body>
-  <div class="loading" id="loading">
-    <h1>WALLET CAM</h1>
-    <p style="opacity:0.6;margin:0">Chargement de la trésorerie…</p>
+  <div class="splash" id="splash">
+    <svg class="logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="72" height="72">
+      <defs>
+        <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#00C9A7"/>
+          <stop offset="100%" stop-color="#00B4D8"/>
+        </linearGradient>
+      </defs>
+      <rect width="64" height="64" rx="14" fill="#0B1426"/>
+      <rect x="12" y="18" width="40" height="30" rx="6" fill="url(#g)"/>
+      <rect x="12" y="18" width="40" height="10" rx="3" fill="#0B1426" opacity="0.25"/>
+      <circle cx="44" cy="36" r="6" fill="#0B1426" opacity="0.35"/>
+      <circle cx="44" cy="36" r="3" fill="#E0FBF6"/>
+    </svg>
+    <p class="title">WALLET CAM</p>
+    <p class="subtitle">Chargement de la trésorerie…</p>
+    <div class="spinner" aria-hidden="true"></div>
   </div>
+
   <script src="flutter_bootstrap.js" async></script>
   <script>
-    window.addEventListener('flutter-first-frame', function () {
-      const el = document.getElementById('loading');
-      if (el) el.remove();
-    });
+    function hideSplash() {
+      var el = document.getElementById('splash');
+      if (!el || el.classList.contains('hidden')) return;
+      el.classList.add('hidden');
+      setTimeout(function () { el.remove(); }, 400);
+    }
+    window.addEventListener('flutter-first-frame', hideSplash);
+    // Sécurité : ne jamais rester bloqué sur le splash
+    setTimeout(hideSplash, 12000);
   </script>
 </body>
 </html>
