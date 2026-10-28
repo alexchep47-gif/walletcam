@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
-import 'dart:ui';
 
 import 'services/local_notification_service.dart';
 import 'models/ardoise.dart';
@@ -65,7 +63,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
-    // IMPORTANT: default 0 — never invent a fake balance
     cashBalance = prefs.getDouble('cash_balance') ?? 0;
     final rawArdoises = prefs.getStringList('ardoises') ?? [];
     ardoises =
@@ -141,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: const TextStyle(color: Colors.white, fontSize: 18),
                 decoration: InputDecoration(
                   hintText: 'Montant en FCFA',
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  hintStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   filled: true,
                   fillColor: Colors.white.withValues(alpha: 0.08),
                   border: OutlineInputBorder(
@@ -156,7 +154,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: 'Libellé (optionnel)',
-                  hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                  hintStyle:
+                      TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                   filled: true,
                   fillColor: Colors.white.withValues(alpha: 0.08),
                   border: OutlineInputBorder(
@@ -170,8 +169,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                        isIncome ? const Color(0xFF00C9A7) : const Color(0xFFFF6B6B),
+                    backgroundColor: isIncome
+                        ? const Color(0xFF00C9A7)
+                        : const Color(0xFFFF6B6B),
                     padding: const EdgeInsets.symmetric(vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
@@ -230,7 +230,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       );
                     });
                     await _saveData();
-                    if (mounted) Navigator.pop(ctx);
+                    if (ctx.mounted) Navigator.pop(ctx);
                   },
                   child: Text(isIncome ? 'Encaisser' : 'Décaisser'),
                 ),
@@ -247,7 +247,9 @@ class _HomeScreenState extends State<HomeScreen> {
     if (loading) {
       return const Scaffold(
         backgroundColor: Color(0xFF0B1426),
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF00C9A7))),
+        body: Center(
+          child: CircularProgressIndicator(color: Color(0xFF00C9A7)),
+        ),
       );
     }
 
@@ -317,7 +319,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 16),
                     Text(
                       'À recouvrer : ${money.format(totalDue)} FCFA · ${ardoises.where((a) => a.status == 'DUE').length} ardoise(s)',
-                      style: TextStyle(color: Colors.white.withValues(alpha: 0.65)),
+                      style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.65)),
                     ),
                   ],
                 ),
@@ -343,7 +346,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     gradient: const LinearGradient(
@@ -352,7 +356,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   child: const Row(
                     children: [
-                      Icon(Icons.account_balance_wallet_rounded, color: Colors.white),
+                      Icon(Icons.account_balance_wallet_rounded,
+                          color: Colors.white),
                       SizedBox(width: 12),
                       Text(
                         'Trésorerie',
@@ -363,7 +368,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       Spacer(),
-                      Icon(Icons.arrow_forward_ios_rounded, color: Colors.white70, size: 16),
+                      Icon(Icons.arrow_forward_ios_rounded,
+                          color: Colors.white70, size: 16),
                     ],
                   ),
                 ),
@@ -403,7 +409,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ...movements.take(8).map((m) => Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: GlassCard(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
                         child: Row(
                           children: [
                             Icon(
@@ -427,9 +434,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
                                   Text(
-                                    DateFormat('dd MMM · HH:mm', 'fr_FR').format(m.createdAt),
+                                    DateFormat('dd MMM · HH:mm', 'fr_FR')
+                                        .format(m.createdAt),
                                     style: TextStyle(
-                                      color: Colors.white.withValues(alpha: 0.45),
+                                      color:
+                                          Colors.white.withValues(alpha: 0.45),
                                       fontSize: 11,
                                     ),
                                   ),
@@ -549,7 +558,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: const Color(0xFF0F1C3F),
-        title: const Text('Paiement partiel', style: TextStyle(color: Colors.white)),
+        title: const Text('Paiement partiel',
+            style: TextStyle(color: Colors.white)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -564,7 +574,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Montant reçu',
-                hintStyle: TextStyle(color: Colors.white.withValues(alpha: 0.4)),
+                hintStyle:
+                    TextStyle(color: Colors.white.withValues(alpha: 0.4)),
                 filled: true,
                 fillColor: Colors.white.withValues(alpha: 0.08),
                 border: OutlineInputBorder(
@@ -630,7 +641,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
       isScrollControlled: true,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setModal) => Padding(
-          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          padding:
+              EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
           child: GlassCard(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(24),
@@ -664,7 +676,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                   controller: amountCtrl,
                   keyboardType: TextInputType.number,
                   style: const TextStyle(color: Colors.white),
-                  decoration: _fieldDeco('Montant FCFA', Icons.payments_outlined),
+                  decoration:
+                      _fieldDeco('Montant FCFA', Icons.payments_outlined),
                 ),
                 const SizedBox(height: 10),
                 ListTile(
@@ -673,13 +686,15 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                     'Échéance : ${DateFormat('dd/MM/yyyy').format(dueDate)}',
                     style: const TextStyle(color: Colors.white),
                   ),
-                  trailing: const Icon(Icons.calendar_today, color: Colors.white70),
+                  trailing:
+                      const Icon(Icons.calendar_today, color: Colors.white70),
                   onTap: () async {
                     final picked = await showDatePicker(
                       context: ctx,
                       initialDate: dueDate,
                       firstDate: DateTime.now(),
-                      lastDate: DateTime.now().add(const Duration(days: 365 * 2)),
+                      lastDate:
+                          DateTime.now().add(const Duration(days: 365 * 2)),
                       builder: (context, child) => Theme(
                         data: ThemeData.dark().copyWith(
                           colorScheme: const ColorScheme.dark(
@@ -727,9 +742,9 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
 
                     setState(() => ardoises.insert(0, ardoise));
                     widget.onUpdate(ardoises);
-                    if (mounted) Navigator.pop(ctx);
+                    if (ctx.mounted) Navigator.pop(ctx);
                   },
-                  child: const Text('Créer l\'ardoise'),
+                  child: const Text("Créer l'ardoise"),
                 ),
               ],
             ),
@@ -776,7 +791,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                   children: [
                     IconButton(
                       onPressed: () => Navigator.pop(context),
-                      icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.white),
+                      icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                          color: Colors.white),
                     ),
                     const Text(
                       'Trésorerie',
@@ -799,11 +815,13 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                         child: Column(
                           children: [
                             Icon(Icons.receipt_long_outlined,
-                                size: 64, color: Colors.white.withValues(alpha: 0.2)),
+                                size: 64,
+                                color: Colors.white.withValues(alpha: 0.2)),
                             const SizedBox(height: 16),
                             Text(
                               'Aucune ardoise',
-                              style: TextStyle(color: Colors.white.withValues(alpha: 0.5)),
+                              style: TextStyle(
+                                  color: Colors.white.withValues(alpha: 0.5)),
                             ),
                           ],
                         ),
@@ -868,9 +886,13 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                       ? const Color(0xFFFF6B6B).withValues(alpha: 0.2)
                       : const Color(0xFF00C9A7).withValues(alpha: 0.2),
                   child: Text(
-                    a.clientName.isNotEmpty ? a.clientName[0].toUpperCase() : '?',
+                    a.clientName.isNotEmpty
+                        ? a.clientName[0].toUpperCase()
+                        : '?',
                     style: TextStyle(
-                      color: isDue ? const Color(0xFFFF6B6B) : const Color(0xFF00C9A7),
+                      color: isDue
+                          ? const Color(0xFFFF6B6B)
+                          : const Color(0xFF00C9A7),
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -902,7 +924,9 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                 Text(
                   '${money.format(a.remainingAmount)} F',
                   style: TextStyle(
-                    color: isDue ? const Color(0xFFFF6B6B) : const Color(0xFF00C9A7),
+                    color: isDue
+                        ? const Color(0xFFFF6B6B)
+                        : const Color(0xFF00C9A7),
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -911,19 +935,23 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
             const SizedBox(height: 10),
             Row(
               children: [
-                Icon(Icons.event, size: 13, color: Colors.white.withValues(alpha: 0.4)),
+                Icon(Icons.event,
+                    size: 13, color: Colors.white.withValues(alpha: 0.4)),
                 const SizedBox(width: 4),
                 Text(
                   DateFormat('dd MMM yyyy', 'fr_FR').format(a.dueDate),
                   style: TextStyle(
-                    color: isLate ? const Color(0xFFFF6B6B) : Colors.white.withValues(alpha: 0.45),
+                    color: isLate
+                        ? const Color(0xFFFF6B6B)
+                        : Colors.white.withValues(alpha: 0.45),
                     fontSize: 12,
                   ),
                 ),
                 if (isLate) ...[
                   const SizedBox(width: 8),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFF6B6B).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
@@ -942,7 +970,8 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                   ),
                   TextButton(
                     onPressed: () => _markAsPaid(a),
-                    style: TextButton.styleFrom(foregroundColor: const Color(0xFF00C9A7)),
+                    style: TextButton.styleFrom(
+                        foregroundColor: const Color(0xFF00C9A7)),
                     child: const Text('Tout payer'),
                   ),
                 ],
