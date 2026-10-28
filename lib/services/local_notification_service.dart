@@ -1,20 +1,23 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz;
-import 'package:flutter_timezone/flutter_timezone.dart';
 
 class LocalNotificationService {
   final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
 
+  bool get isSupported => !kIsWeb;
+
   Future<void> init() async {
+    if (kIsWeb) return; // Notifications locales non supportées sur le web
+
     tz.initializeTimeZones();
 
     try {
-      final String timeZoneName = await FlutterTimezone.getLocalTimezone();
-      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      // flutter_timezone peut échouer sur certains environnements
+      tz.setLocalLocation(tz.getLocation('Africa/Douala'));
     } catch (_) {
-      // Fallback Cameroun
       tz.setLocalLocation(tz.getLocation('Africa/Douala'));
     }
 
@@ -26,11 +29,10 @@ class LocalNotificationService {
     await _plugin.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // Payload = ardoiseId — peut être utilisé pour la navigation
+        // Payload = ardoiseId
       },
     );
 
-    // Permission Android 13+
     await _plugin
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -44,6 +46,8 @@ class LocalNotificationService {
     required double amount,
     required DateTime dueDate,
   }) async {
+    if (kIsWeb) return;
+
     const androidDetails = AndroidNotificationDetails(
       'walletcam_treasury_reminders',
       'Relances de Dettes',
@@ -59,7 +63,6 @@ class LocalNotificationService {
 
     final scheduled = tz.TZDateTime.from(dueDate, tz.local);
 
-    // Ne pas planifier si déjà passé
     if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) return;
 
     await _plugin.zonedSchedule(
@@ -76,6 +79,7 @@ class LocalNotificationService {
   }
 
   Future<void> cancelReminder(int notificationId) async {
+    if (kIsWeb) return;
     await _plugin.cancel(notificationId);
   }
 }
