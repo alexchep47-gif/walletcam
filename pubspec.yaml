@@ -1,17 +1,27 @@
 name: walletcam
-description: Portefeuille multi-devises educatif Walletcam.
+description: Walletcam — Application de trésorerie et gestion de caisse offline-first pour commerçants camerounais.
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+1
+
 environment:
   sdk: '>=3.2.0 <4.0.0'
+
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
   intl: ^0.19.0
+  shared_preferences: ^2.3.2
+  uuid: ^4.5.1
+  flutter_local_notifications: ^18.0.1
+  timezone: ^0.9.4
+  flutter_timezone: ^3.0.1
+  connectivity_plus: ^6.0.5
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+
 flutter:
   uses-material-design: true

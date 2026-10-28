@@ -1,24 +1,40 @@
 # Walletcam
 
-Application Flutter de portefeuille numérique multi-devises pour le projet INF151. Walletcam simule les transferts XAF, USD et EUR, avec conversion, frais de 2,5 %, taxe de 19,25 %, commission marchand de 1 %, historique, taux et rapports.
+**Walletcam** est une application de trésorerie et de gestion de caisse conçue pour les commerçants et petites entreprises au Cameroun.
 
-## Lancer localement
+## Fonctionnalités principales
+
+- **Tableau de bord** : solde de caisse, entrées / sorties du jour
+- **Module Trésorerie** : gestion des ardoises (crédits clients)
+  - Création d’une ardoise (client + montant + date d’échéance)
+  - Suivi des dettes restantes
+  - Marquage comme payé
+  - Relances locales (notifications) à la date d’échéance
+- **Design Glassmorphism** : interface moderne, frosted glass, sombre et élégante
+- **100 % Offline-First** : fonctionne sans internet. Les données restent sur l’appareil.
+- **Notifications locales** : rappels de dettes même sans connexion
+
+## Lancer l’application
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-## Tests et build
+## Build APK
 
 ```bash
-flutter analyze
-flutter test
 flutter build apk --release
 ```
 
-Le workflow GitHub Actions `.github/workflows/flutter.yml` installe Flutter, lance l’analyse et les tests, puis produit `app-release.apk` comme artifact à chaque push sur `main` ou pull request.
+L’APK est automatiquement généré par GitHub Actions à chaque push sur `main`.
 
-## Hypothèses pédagogiques
+## Architecture
 
-Les taux sont saisis manuellement et ne représentent pas le marché. Les calculs sont une simulation sans banque ni argent réel. Les frais (2,5 % + 100 XAF), la taxe (19,25 %) et la commission marchand (1 %) sont configurables dans la logique métier. Les montants sont stockés en micro-unités entières afin d’éviter les erreurs binaires de flottants pour les soldes.
+- Stockage local via `shared_preferences` (prêt pour migration Isar)
+- Notifications via `flutter_local_notifications` + timezone `Africa/Douala`
+- UI Glassmorphism pure Flutter (BackdropFilter)
+
+## Licence
+
+Propriétaire — Walletcam © 2026
