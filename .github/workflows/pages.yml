@@ -1,0 +1,49 @@
+name: Walletcam Web Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+      - name: Configurer GitHub Pages
+        uses: actions/configure-pages@v5
+      - name: Installer Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.8'
+          cache: true
+      - name: Installer les dépendances
+        run: flutter pub get
+      - name: Construire Flutter Web
+        run: flutter build web --release --base-href /walletcam/
+      - name: Préparer l’artifact Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: build/web
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    name: Déployer sur GitHub Pages
+    steps:
+      - name: Publier Walletcam
+        id: deployment
+        uses: actions/deploy-pages@v4
