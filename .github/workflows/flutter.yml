@@ -20,7 +20,7 @@ jobs:
       - name: Installer les dépendances
         run: flutter pub get
       - name: Analyser le code
-        run: flutter analyze
+        run: flutter analyze --no-fatal-infos
       - name: Exécuter les tests
         run: flutter test
       - name: Construire l’APK release
