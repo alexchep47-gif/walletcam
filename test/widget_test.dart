@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:walletcam/models/ardoise.dart';
+import 'package:walletcam/models/cash_movement.dart';
 
 void main() {
   test('Ardoise model serializes correctly', () {
@@ -35,5 +36,22 @@ void main() {
     expect(paid.status, 'PAID');
     expect(paid.remainingAmount, 0);
     expect(paid.clientName, 'Test');
+  });
+
+  test('CashMovement serializes correctly', () {
+    final m = CashMovement(
+      id: 'mov-1',
+      amount: 15000,
+      isIncome: true,
+      label: 'Vente',
+      createdAt: DateTime(2026, 10, 28, 12, 0),
+    );
+
+    final json = m.toJson();
+    final restored = CashMovement.fromJson(json);
+
+    expect(restored.amount, 15000);
+    expect(restored.isIncome, true);
+    expect(restored.label, 'Vente');
   });
 }
