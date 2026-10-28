@@ -10,15 +10,14 @@ class LocalNotificationService {
   bool get isSupported => !kIsWeb;
 
   Future<void> init() async {
-    if (kIsWeb) return; // Notifications locales non supportées sur le web
+    if (kIsWeb) return;
 
     tz.initializeTimeZones();
 
     try {
-      // flutter_timezone peut échouer sur certains environnements
       tz.setLocalLocation(tz.getLocation('Africa/Douala'));
     } catch (_) {
-      tz.setLocalLocation(tz.getLocation('Africa/Douala'));
+      // Fallback: keep default local if location data unavailable
     }
 
     const androidSettings =
@@ -61,7 +60,14 @@ class LocalNotificationService {
 
     const details = NotificationDetails(android: androidDetails);
 
-    final scheduled = tz.TZDateTime.from(dueDate, tz.local);
+    // Relance à 09h00 (heure de Douala) le jour d'échéance
+    final scheduled = tz.TZDateTime(
+      tz.local,
+      dueDate.year,
+      dueDate.month,
+      dueDate.day,
+      9,
+    );
 
     if (scheduled.isBefore(tz.TZDateTime.now(tz.local))) return;
 
