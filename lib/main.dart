@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +9,7 @@ import 'dart:ui';
 
 import 'services/local_notification_service.dart';
 import 'models/ardoise.dart';
+import 'models/cash_movement.dart';
 import 'theme/app_theme.dart';
 
 void main() async {
@@ -53,6 +55,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   double cashBalance = 0;
   List<Ardoise> ardoises = [];
+  List<CashMovement> movements = [];
   final money = NumberFormat('#,##0', 'fr_FR');
 
   @override
@@ -64,8 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     cashBalance = prefs.getDouble('cash_balance') ?? 485000;
-    final raw = prefs.getStringList('ardoises') ?? [];
-    ardoises = raw.map((e) => Ardoise.fromJson(jsonDecode(e))).toList();
+    final rawArdoises = prefs.getStringList('ardoises') ?? [];
+    ardoises = rawArdoises.map((e) => Ardoise.fromJson(jsonDecode(e))).toList();
+    final rawMovements = prefs.getStringList('cash_movements') ?? [];
+    movements =
+        rawMovements.map((e) => CashMovement.fromJson(jsonDecode(e))).toList();
     setState(() {});
   }
 
@@ -75,6 +81,10 @@ class _HomeScreenState extends State<HomeScreen> {
     await prefs.setStringList(
       'ardoises',
       ardoises.map((a) => jsonEncode(a.toJson())).toList(),
+    );
+    await prefs.setStringList(
+      'cash_movements',
+      movements.map((m) => jsonEncode(m.toJson())).toList(),
     );
   }
 
@@ -128,11 +138,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  GlassCard(
-                    padding: const EdgeInsets.all(12),
-                    child: const Icon(Icons.notifications_none_rounded,
-                        color: Colors.white70, size: 22),
-                  ),
+                  if (!kIsWeb)
+                    GlassCard(
+                      padding: const EdgeInsets.all(12),
+                      child: const Icon(Icons.notifications_none_rounded,
+                          color: Colors.white70, size: 22),
+                    ),
                 ],
               ),
               const SizedBox(height: 28),
@@ -165,7 +176,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         _miniStat('À recouvrer', totalDue, const Color(0xFFFF6B6B)),
                         const SizedBox(width: 16),
-                        _miniStat('Ardoises', ardoises.where((a) => a.status == 'DUE').length.toDouble(), const Color(0xFF4ECDC4)),
+                        _miniStat(
+                            'Ardoises',
+                            ardoises
+                                .where((a) => a.status == 'DUE')
+                                .length
+                                .toDouble(),
+                            const Color(0xFF4ECDC4)),
                       ],
                     ),
                   ],
@@ -193,7 +210,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     gradient: const LinearGradient(
@@ -264,6 +282,78 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 28),
 
+              // Recent movements
+              if (movements.isNotEmpty) ...[
+                Text(
+                  'Derniers mouvements',
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.7),
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ...movements.take(5).map((m) => Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: GlassCard(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 12),
+                        child: Row(
+                          children: [
+                            Icon(
+                              m.isIncome
+                                  ? Icons.arrow_downward_rounded
+                                  : Icons.arrow_upward_rounded,
+                              color: m.isIncome
+                                  ? const Color(0xFF00C9A7)
+                                  : const Color(0xFFFF6B6B),
+                              size: 20,
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    m.label.isNotEmpty
+                                        ? m.label
+                                        : (m.isIncome
+                                            ? 'Encaissement'
+                                            : 'Décaissement'),
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                  Text(
+                                    DateFormat('dd MMM · HH:mm', 'fr_FR')
+                                        .format(m.createdAt),
+                                    style: TextStyle(
+                                      color: Colors.white.withOpacity(0.45),
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Text(
+                              '${m.isIncome ? '+' : '-'}${money.format(m.amount)} F',
+                              style: TextStyle(
+                                color: m.isIncome
+                                    ? const Color(0xFF00C9A7)
+                                    : const Color(0xFFFF6B6B),
+                                fontWeight: FontWeight.w700,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )),
+                const SizedBox(height: 16),
+              ],
+
               // Recent ardoises preview
               if (ardoises.where((a) => a.status == 'DUE').isNotEmpty) ...[
                 Text(
@@ -286,8 +376,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             child: Row(
                               children: [
                                 CircleAvatar(
-                                  backgroundColor:
-                                      const Color(0xFF00C9A7).withOpacity(0.2),
+                                  backgroundColor: const Color(0xFF00C9A7)
+                                      .withOpacity(0.2),
                                   child: Text(
                                     a.clientName.isNotEmpty
                                         ? a.clientName[0].toUpperCase()
@@ -402,7 +492,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _adjustCash(bool isIncome) {
-    final controller = TextEditingController();
+    final amountCtrl = TextEditingController();
+    final labelCtrl = TextEditingController();
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -428,7 +519,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 16),
               TextField(
-                controller: controller,
+                controller: amountCtrl,
                 keyboardType: TextInputType.number,
                 style: const TextStyle(color: Colors.white, fontSize: 18),
                 decoration: InputDecoration(
@@ -444,25 +535,51 @@ class _HomeScreenState extends State<HomeScreen> {
                   suffixStyle: const TextStyle(color: Colors.white70),
                 ),
               ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: labelCtrl,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: 'Libellé (ex: Vente, Achat stock…)',
+                  hintStyle: TextStyle(color: Colors.white.withOpacity(0.4)),
+                  filled: true,
+                  fillColor: Colors.white.withOpacity(0.08),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(14),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 width: double.infinity,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor:
-                        isIncome ? const Color(0xFF00C9A7) : const Color(0xFFFF6B6B),
+                    backgroundColor: isIncome
+                        ? const Color(0xFF00C9A7)
+                        : const Color(0xFFFF6B6B),
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
                   onPressed: () async {
-                    final amount = double.tryParse(
-                            controller.text.replaceAll(RegExp(r'[^0-9]'), '')) ??
+                    final amount = double.tryParse(amountCtrl.text
+                            .replaceAll(RegExp(r'[^0-9]'), '')) ??
                         0;
                     if (amount <= 0) return;
+
+                    final movement = CashMovement(
+                      id: const Uuid().v4(),
+                      amount: amount,
+                      isIncome: isIncome,
+                      label: labelCtrl.text.trim(),
+                      createdAt: DateTime.now(),
+                    );
+
                     setState(() {
                       cashBalance += isIncome ? amount : -amount;
+                      movements.insert(0, movement);
                     });
                     await _saveData();
                     if (mounted) Navigator.pop(ctx);
@@ -867,7 +984,6 @@ class _TreasuryScreenState extends State<TreasuryScreen> {
                         status: 'DUE',
                       );
 
-                      // Schedule local notification
                       await widget.notificationService.scheduleArdoiseReminder(
                         notificationId: id.hashCode.abs() % 100000,
                         ardoiseId: id,
